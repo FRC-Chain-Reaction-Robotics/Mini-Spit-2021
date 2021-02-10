@@ -18,7 +18,7 @@ public class Demo
 
         /// 2. Limit by time
         if (0 <= time && time <= 5)
-            dt.drive(0, 1, 0);
+            dt.drive(0, 1, 0); 
 
         /// 3. Limit by sensors --> real world feedback         
         if (true/*encoder.getPosition() < 1 meter*/)
