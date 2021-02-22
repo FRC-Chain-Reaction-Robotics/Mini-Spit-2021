@@ -5,6 +5,8 @@ import static com.revrobotics.CANSparkMaxLowLevel.MotorType.*;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.ControlType;
+
 import static com.revrobotics.CANSparkMax.IdleMode.*;
 
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
@@ -13,10 +15,16 @@ import edu.wpi.first.wpilibj.Sendable;
 import static edu.wpi.first.wpilibj.SPI.Port.*;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
+import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
+import edu.wpi.first.wpilibj.kinematics.MecanumDriveKinematics;
+import edu.wpi.first.wpilibj.kinematics.MecanumDriveOdometry;
+import edu.wpi.first.wpilibj.kinematics.MecanumDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class Mecanum
+public class MecanumOdom
 {
     /// Spitfire BIG
     CANSparkMax lf = new CANSparkMax(1, kBrushless);
@@ -45,8 +53,21 @@ public class Mecanum
     Gyro gyro = new ADXRS450_Gyro(kOnboardCS0);
 
     PIDController aimPID = new PIDController(0.01, 0, 0);
+    
+    // Creating my kinematics object using the wheel locations.
+    MecanumDriveKinematics m_kinematics = new MecanumDriveKinematics
+    ( //  TODO: fix
+        new Translation2d(0.381, 0.381),    //  fl
+        new Translation2d(0.381, -0.381),   //  fr
+        new Translation2d(-0.381, 0.381),   //  bl
+        new Translation2d(-0.381, -0.381)   //  br
+    );
 
-    public Mecanum() 
+    // Creating my odometry object from the kinematics object.
+    MecanumDriveOdometry m_odometry = new MecanumDriveOdometry(m_kinematics, new Rotation2d(-gyro.getAngle()));
+
+
+    public MecanumOdom() 
     {
         md.setMaxOutput(.44); // spitfire
 
@@ -59,6 +80,13 @@ public class Mecanum
         m_rightBackEncoder.setPositionConversionFactor(0.0454);
         m_leftFrontEncoder.setPositionConversionFactor(0.0454);
         m_leftBackEncoder.setPositionConversionFactor(0.0454);
+
+        m_rightFrontEncoder.setVelocityConversionFactor(0.0454);
+        m_rightBackEncoder.setVelocityConversionFactor(0.0454);
+        m_leftFrontEncoder.setVelocityConversionFactor(0.0454);
+        m_leftBackEncoder.setVelocityConversionFactor(0.0454); 
+        
+        setAllPIDs();
 
         /* For spitfire, not for new robot
         lf.setInverted(true);
@@ -174,5 +202,75 @@ public class Mecanum
         md.driveCartesian(0, distanceOutput, turnOutput);
 
         return distPID.atSetpoint();
+    }
+
+
+    public Pose2d getPosition()
+    {
+        return m_odometry.getPoseMeters();
+    }
+
+    public void resetPosition()
+    {
+        m_odometry.resetPosition(new Pose2d(), new Rotation2d(-gyro.getAngle()));
+    }
+
+    /**
+     * Call me in robotPeriodic pls!
+     */
+    public void updatePosition()
+    {
+        // Thought:
+        // position += (lastPosition + encoder.getPosition())
+        //// The idea is that this works even if encoders get reset
+        // lastPosition = position
+        // deltaEncoderPosition = encoder.getPosition() - lastEncoderPosition
+        // lastEncoderPosition = encoder.getPosition()
+
+
+          // Get my wheel speeds
+        var wheelSpeeds = new MecanumDriveWheelSpeeds(
+            m_leftFrontEncoder.getVelocity(), m_rightFrontEncoder.getVelocity(),
+            m_leftBackEncoder.getVelocity(), m_rightBackEncoder.getVelocity());
+
+        // Get my gyro angle. We are negating the value because gyros return positive
+        // values as the robot turns clockwise. This is not standard convention that is
+        // used by the WPILib classes.
+        var gyroAngle = Rotation2d.fromDegrees(-gyro.getAngle());
+
+        // Update the pose
+        m_odometry.update(gyroAngle, wheelSpeeds);
+    }
+
+
+
+
+    // for trajs:
+    public void setWheelSpeedsPID(MecanumDriveWheelSpeeds wheelSpeeds)
+    {
+        // Get the individual wheel speeds
+        double frontLeft = wheelSpeeds.frontLeftMetersPerSecond;
+        double frontRight = wheelSpeeds.frontRightMetersPerSecond;
+        double backLeft = wheelSpeeds.rearLeftMetersPerSecond;
+        double backRight = wheelSpeeds.rearRightMetersPerSecond;
+
+        lf_PID.setReference(frontLeft, ControlType.kVelocity);
+        rf_PID.setReference(frontRight, ControlType.kVelocity);
+        lb_PID.setReference(backLeft, ControlType.kVelocity);
+        rb_PID.setReference(backRight, ControlType.kVelocity);
+    }
+
+    private void setAllPIDs()
+    {
+        setPIDs(lf_PID);
+        setPIDs(rf_PID);
+        setPIDs(lb_PID);
+        setPIDs(rb_PID);
+    }
+    private void setPIDs(CANPIDController ctrler)
+    {
+        ctrler.setP(1); //  TODO: what
+        ctrler.setI(0);
+        ctrler.setD(0);
     }
 }

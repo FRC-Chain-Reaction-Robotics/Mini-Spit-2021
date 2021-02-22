@@ -1,12 +1,10 @@
 package frc.robot.subsystems;
 
-import javax.lang.model.util.ElementScanner6;
-
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
-import edu.wpi.first.wpilibj.controller.PIDController;
 import frc.Constants;
 
 public class Shooter
@@ -18,23 +16,26 @@ public class Shooter
     
     public Shooter()
     {
+        loadMotor.setInverted(true);
+
+        shootMotorRight.follow(shootMotorLeft);
         shootMotorRight.setInverted(true);
+
+        
+        shootMotorLeft.config_kP(0, 0.01 * 0.25);   //  use 0.25 on talons
     }
 
     public void shoot()
     {
-       shootMotorLeft.config_kP(, )
-        loadMotor.set(ControlMode.PercentOutput, power)
-
-        shootMotorLeft
-      
-      
-        //shooterPID.set
-
+        shootMotorLeft.set(TalonFXControlMode.Velocity, 1000);  //  incorrect units. do we need a wrapper class??
+        
+        if (shootMotorLeft.getClosedLoopError(0) < 50) 
+            loadMotor.set(ControlMode.PercentOutput, 1);
     }
-    
-    public void blabla(double velocity)
-    {
 
+    public void stop()
+    {
+        shootMotorLeft.set(TalonFXControlMode.Velocity, 0);
+        loadMotor.set(ControlMode.PercentOutput, 0);
     }
 }
