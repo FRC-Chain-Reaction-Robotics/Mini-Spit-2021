@@ -15,14 +15,15 @@ import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.Constants;
 
 public class Mecanum
 {
     /// Spitfire BIG
-    CANSparkMax lf = new CANSparkMax(1, kBrushless);
-    CANSparkMax lb = new CANSparkMax(6, kBrushless);
-    CANSparkMax rf = new CANSparkMax(2, kBrushless);
-    CANSparkMax rb = new CANSparkMax(5, kBrushless);
+    CANSparkMax lf = new CANSparkMax(Constants.LF, kBrushless);
+    CANSparkMax lb = new CANSparkMax(Constants.LB, kBrushless);
+    CANSparkMax rf = new CANSparkMax(Constants.RF, kBrushless);
+    CANSparkMax rb = new CANSparkMax(Constants.RB, kBrushless);
 
     /// Minispit
     // CANSparkMax lf = new CANSparkMax(2, kBrushless);
@@ -48,9 +49,10 @@ public class Mecanum
 
     public Mecanum() 
     {
-        md.setMaxOutput(.44); // spitfire
+        // md.setMaxOutput(0.44); // spitfire
 
-        // md.setMaxOutput(.35); minispit
+        // md.setMaxOutput(.35); // minispit
+
 
         gyro.reset();
         gyro.calibrate();
@@ -68,11 +70,19 @@ public class Mecanum
 
         // Minispit
         rf.setInverted(true);
+        rb.setInverted(true);
 
 		lb.setIdleMode(kCoast);
 		rf.setIdleMode(kCoast);
 		rb.setIdleMode(kCoast);
-		lf.setIdleMode(kCoast);
+        lf.setIdleMode(kCoast);
+        
+        lb.setSmartCurrentLimit(40);
+        lf.setSmartCurrentLimit(40);
+        rf.setSmartCurrentLimit(40);
+        rb.setSmartCurrentLimit(40);
+        
+        md.setMaxOutput(0.44);
 
 		lf.burnFlash();
 		lb.burnFlash();
@@ -101,9 +111,20 @@ public class Mecanum
     //         md.driveCartesian(multiplier*xSpeed, multiplier*ySpeed, multiplier*zRotation);
     // }
     
-    public void drive(double xSpeed, double ySpeed, double zRotation)
+    /**
+   * Drive method for Mecanum platform.
+   *
+   * <p>Angles are measured clockwise from the positive X axis. The robot's speed is independent
+   * from its angle or rotation rate.
+   *
+   * @param ySpeed The robot's speed along the Y axis [-1.0..1.0]. Right is positive.
+   * @param xSpeed The robot's speed along the X axis [-1.0..1.0]. Forward is positive.
+   * @param zRotation The robot's rotation rate around the Z axis [-1.0..1.0]. Clockwise is
+   *     positive.
+   */
+    public void drive(double ySpeed, double xSpeed, double zRotation)
     {
-        md.driveCartesian(xSpeed, ySpeed, zRotation);
+        md.driveCartesian(ySpeed, xSpeed, zRotation);
     }
 
     // displays the heading data in the gyro, form of a compass
