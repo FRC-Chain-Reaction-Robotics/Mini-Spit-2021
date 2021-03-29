@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.Constants;
+import frc.robot.Constants;
 
 public class Mecanum
 {
@@ -47,8 +47,11 @@ public class Mecanum
 
     PIDController aimPID = new PIDController(0.01, 0, 0);
 
-    public Mecanum() 
+    Limelight ll;
+
+    public Mecanum(Limelight ll) 
     {
+        this.ll = ll;
         // md.setMaxOutput(0.44); // spitfire
 
         // md.setMaxOutput(.35); // minispit
@@ -77,12 +80,13 @@ public class Mecanum
 		rb.setIdleMode(kCoast);
         lf.setIdleMode(kCoast);
         
-        lb.setSmartCurrentLimit(40);
-        lf.setSmartCurrentLimit(40);
-        rf.setSmartCurrentLimit(40);
-        rb.setSmartCurrentLimit(40);
+        // lb.setSmartCurrentLimit(40);
+        // lf.setSmartCurrentLimit(40);
+        // rf.setSmartCurrentLimit(40);
+        // rb.setSmartCurrentLimit(40);
         
-        md.setMaxOutput(0.44);
+        // md.setMaxOutput(0.44);
+        md.setMaxOutput(1);
 
 		lf.burnFlash();
 		lb.burnFlash();
@@ -195,5 +199,12 @@ public class Mecanum
         md.driveCartesian(0, distanceOutput, turnOutput);
 
         return distPID.atSetpoint();
+    }
+
+    public boolean aim()
+    {
+        md.driveCartesian(0, 0, aimPID.calculate(ll.getTx(), 0));
+
+        return turnPID.atSetpoint();
     }
 }

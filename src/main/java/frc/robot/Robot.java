@@ -7,32 +7,29 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.SlewRateLimiter;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import static edu.wpi.first.wpilibj.GenericHID.Hand.*;
-
-import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 
 import frc.robot.subsystems.*;
 
 public class Robot extends TimedRobot
 {
-	Mecanum dt = new Mecanum();
+	Limelight ll = new Limelight();
+	DistanceSensor distanceSensor = new DistanceSensor();
+	Mecanum dt = new Mecanum(ll);
 	Shooter shooter = new Shooter();
+	Intake intake = new Intake();
 	XboxController driverController = new XboxController(0);
 	Skillz skills = new Skillz(dt);
-
-	// for pid tune testing
-	double angle;
 
 	@Override
 	public void robotInit()
 	{
 		dt.resetSensors();
+		intake.resetEncoder();
 	}
 
 	@Override
@@ -40,70 +37,68 @@ public class Robot extends TimedRobot
 	{
 		dt.displayEncoders();
 		dt.displayGyro();
-		
-		angle = SmartDashboard.getNumber("Turn To?", 0);
-		SmartDashboard.putNumber("Turn To?", angle);
+
+		intake.printPosition();
+		SmartDashboard.putNumber("ultrasonic", distanceSensor.getDistance());
 	}
 
 	@Override
 	public void teleopInit()
 	{
 		dt.resetSensors();
+		intake.resetEncoder();
 	}
-
-
-
-	// This will limit the rate of change of the joystick inputs, meaning it'll accelerate less quickly.
-	// This may help with brownout issues, imprecise PID movements, etc.
-	double accelLimit = 1024;	//	Units per second
-	SlewRateLimiter accelLimiter = new SlewRateLimiter(accelLimit);
 
 	@Override
 	public void teleopPeriodic()
-	{
-		
-		if (driverController.getBButton())
-		{
-			shooter.shootMotorLeft.set(TalonFXControlMode.PercentOutput, driverController.getTriggerAxis(Hand.kRight));
-			shooter.shootMotorRight.set(TalonFXControlMode.PercentOutput, driverController.getTriggerAxis(Hand.kRight));
-		} else
-		{
-			shooter.shootMotorLeft.set(TalonFXControlMode.PercentOutput, 0);
-			shooter.shootMotorRight.set(TalonFXControlMode.PercentOutput, 0);
-		}
-
-		if (driverController.getAButton()) shooter.shoot();
-		else shooter.stop();
+	{	
+		//#region intake
+		if (driverController.getPOV(0) == 0)
+			intake.up();
+		else if (driverController.getPOV(0) == 180)
+			intake.down();
+		else
+			intake.freezePosition();
 
 
+		if (driverController.getYButton())
+			intake.on();
+		else
+			intake.off();
+		//#endregion
+
+		//#region shooting
+		if (driverController.getXButton())
+			shooter.shoot();
+		else
+			shooter.stopShooting();
+
+		if (driverController.getAButton())
+			shooter.shoot();
+		else if (driverController.getBButton())
+			shooter.reverseLoader();
+		else
+			shooter.stopLoading();
+		//#endregion
+
+		//#region driving
 		double forwardPower = driverController.getY(kLeft);
 		double strafePower = driverController.getX(kLeft);
 		double turnPower = driverController.getX(kRight);
 
-
-		// Recalculates such that the rate of change is limited to accelLimit
-		forwardPower = accelLimiter.calculate(forwardPower);
-		// If you want to limit strafing and turning as well, you will need separate SlewRateLimiter objects.
-
-
 		dt.drive(strafePower, forwardPower, turnPower);
-		
-		// pid tune testing code
-		// if (driverController.getAButton())
-		// 	dt.turnToAngle(angle);
-		// else
-		// 	dt.drive(0, 0, 0);
+		//#endregion
 	}
 
-	@Override
-	public void testInit()
-	{
-		skills.init(skills::selectSlalomPath);
-	}
+	// @Override
+	// public void testInit()
+	// {
+	// 	skills.init(skills::selectSimplePath);
+	// }
 
-	@Override
-	public void testPeriodic()
-	{
-		skills.periodic();
-	}
+	// @Override
+	// public void testPeriodic()
+	// {
+	// 	skills.periodic();
+	// }
 }
