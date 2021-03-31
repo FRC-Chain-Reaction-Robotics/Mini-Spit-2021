@@ -9,6 +9,7 @@ import static com.revrobotics.CANSparkMax.IdleMode.*;
 
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Sendable;
+import edu.wpi.first.wpilibj.Timer;
 
 import static edu.wpi.first.wpilibj.SPI.Port.*;
 import edu.wpi.first.wpilibj.controller.PIDController;
@@ -20,17 +21,10 @@ import frc.robot.Constants;
 
 public class Mecanum
 {
-    /// Spitfire BIG
     CANSparkMax lf = new CANSparkMax(Constants.Drivetrain.LF, kBrushless);
     CANSparkMax lb = new CANSparkMax(Constants.Drivetrain.LB, kBrushless);
     CANSparkMax rf = new CANSparkMax(Constants.Drivetrain.RF, kBrushless);
     CANSparkMax rb = new CANSparkMax(Constants.Drivetrain.RB, kBrushless);
-
-    /// Minispit
-    // CANSparkMax lf = new CANSparkMax(2, kBrushless);
-    // CANSparkMax lb = new CANSparkMax(1, kBrushless);
-    // CANSparkMax rf = new CANSparkMax(3, kBrushless);
-    // CANSparkMax rb = new CANSparkMax(4, kBrushless);
 
     MecanumDrive md = new MecanumDrive(lf, lb, rf, rb);
 
@@ -104,24 +98,7 @@ public class Mecanum
         lb.setSmartCurrentLimit(40);
         rb.setSmartCurrentLimit(40);
         rf.setSmartCurrentLimit(40);
-    }
-    
-    
-    // public void drive(double xSpeed, double ySpeed, double zRotation)
-    // {
-    //     this.drive(xSpeed, ySpeed, zRotation, false, false);
-    // }
-
-    // public void drive(double xSpeed, double ySpeed, double zRotation, boolean slowMode, boolean fieldOriented)
-    // {
-    //     double multiplier = slowMode ? 0.5 : 1;
-        
-    //     if (fieldOriented)
-    //         md.driveCartesian(multiplier*xSpeed, multiplier*ySpeed, multiplier*zRotation, gyro.getAngle());
-    //     else
-    //         md.driveCartesian(multiplier*xSpeed, multiplier*ySpeed, multiplier*zRotation);
-    // }
-    
+    }    
     /**
    * Drive method for Mecanum platform.
    *
@@ -166,29 +143,6 @@ public class Mecanum
         m_leftFrontEncoder.setPosition(0);
         m_rightFrontEncoder.setPosition(0);
     }
-    
-    
-    // 1.0/15 is for carpet
-    // 1.0/20 is for sully room (for now) HMMM
-    /// update: never drive in sully's room, it's too slippery
-
-    // PIDController turnPID = new PIDController(0.066667, 0, 0);
-
-    // from frcpdr
-    // PIDController turnPID = new PIDController(0.12, 0.49, 0.0073);
-    // from wpiman
-    // PIDController turnPID = new PIDController(0.12, 0.8223, 0.01216);
-    // mean of two
-    // PIDController turnPID = new PIDController(0.12, 0.65, 0.01);
-    // softer??
-    // PIDController turnPID = new PIDController(0.1, 0.6, 0.008);
-    // SOFTER II
-    // PIDController turnPID = new PIDController(0.025, 0.5, 0.0075);
-
-    // from frcpdr; Ziegler-Nichols PI only loop. slow but works
-    // PIDController turnPID = new PIDController(0.09, 0.22, 0);
-
-
 
     PIDController turnPID = Constants.Drivetrain.turnPID;
 
@@ -199,8 +153,7 @@ public class Mecanum
         return turnPID.atSetpoint();
     }
 
-
-
+    //#region actions
     PIDController distPID = Constants.Drivetrain.distPID;
 
     public boolean driveToDistance(double distance)
@@ -221,6 +174,26 @@ public class Mecanum
         return turnPID.atSetpoint();
     }
 
+
+    Timer waitTimer = new Timer();
+    
+    public boolean startWaiting()   //  this is sad. command based plsz
+    {
+        waitTimer.reset();
+        waitTimer.start();
+        return true;
+    }
+    /**
+     * returns true when wait is over
+     */
+    public boolean wait(double time)
+    {
+        double distanceOutput = distPID.calculate(m_leftFrontEncoder.getPosition(), 0);
+
+        md.driveCartesian(0, distanceOutput, 0);
+        return waitTimer.get() <= time;
+    }
+    //#endregion
 
     public void setMaxOutput(double maxOutput)
     {
