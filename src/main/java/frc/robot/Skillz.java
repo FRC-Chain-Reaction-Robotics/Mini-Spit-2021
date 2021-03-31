@@ -114,7 +114,7 @@ public class Skillz
             {turn, 26.565},
             {drive, 1.704},
             {turn, -98.13},
-            {drive, 2.410},
+            {drive, 1.5},
             {turn, 71.65},
             {drive, 3.81}
         };
@@ -124,8 +124,11 @@ public class Skillz
 	{
         auton = new Object[][]
         {
-            {drive, 4.72},
-            {turn, -72.565},
+            // we start with a 90 degree turn to the left, bc you should turn the robot 90 degrees to the right if it's Blue
+            {turn, -90.0},
+            {turn, 21.801},
+            {drive, 4.103},
+            {turn, -94.366},
             {drive, 2.41},
             {turn, 81.87},
             {drive, 1.7},
@@ -138,13 +141,14 @@ public class Skillz
 	{
         auton = new Object[][]
         {
-            {drive, 1.524},
-            {turn, 45.0},
+            {turn, -26.565},
+            {drive, 2.410},
+            {turn, 71.565},
             {drive, 2.155},
             {turn, -90.0},
             {drive, 2.155},
             {turn, 45.0},
-            {drive, 2.268}
+            {drive, 1.9}
         };
     }
     
@@ -152,8 +156,10 @@ public class Skillz
 	{
         auton = new Object[][]
         {
-            {drive, 3.381},
-            {turn, -45.0},
+            // we start with a 90 degree turn to the left, bc you should turn the robot 90 degrees to the right if it's Blue
+            {turn, -90.0},
+            {drive, 3.885},
+            {turn, -56.310},
             {drive, 2.155},
             {turn, 90.0},
             {drive, 2.155},
@@ -178,7 +184,7 @@ public class Skillz
         };
     }
     
-	public void selectMatthewPath()
+	public void selectBarrelPath()
 	{
         auton = new Object[][]
         {
@@ -201,7 +207,7 @@ public class Skillz
         };
 	}
 	
-	public void selectSlalomPath()
+    public void selectSlalomPath()
 	{
         auton = new Object[][]
         {
@@ -223,5 +229,19 @@ public class Skillz
             {turn, 42.0},
             {drive, 2.155}
         };
-	}
+    }
+    
+    public void selectInfRechPath()
+    {
+        auton = new Object[][]
+        {
+            {turn, 130.0},
+            {drive, 1.652},
+            {turn, 50.0},
+            {drive, 3.799},
+            {turn, 140.0},
+            {drive, 2.277},
+            {turn, 40.0}
+        };
+    }
 }

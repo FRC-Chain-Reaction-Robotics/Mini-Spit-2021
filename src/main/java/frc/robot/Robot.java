@@ -9,11 +9,15 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import static edu.wpi.first.wpilibj.GenericHID.Hand.*;
 
+import edu.wpi.first.wpilibj.SlewRateLimiter;
+
 import frc.robot.subsystems.*;
+import frc.robot.sensors.*;
 
 public class Robot extends TimedRobot
 {
@@ -21,6 +25,7 @@ public class Robot extends TimedRobot
 	DistanceSensor distanceSensor = new DistanceSensor();
 	Mecanum dt = new Mecanum(ll);
 	Shooter shooter = new Shooter();
+	BallMgmt loader = new BallMgmt();
 	Intake intake = new Intake();
 	XboxController driverController = new XboxController(0);
 	Skillz skills = new Skillz(dt);
@@ -29,7 +34,6 @@ public class Robot extends TimedRobot
 	public void robotInit()
 	{
 		dt.resetSensors();
-		intake.resetEncoder();
 	}
 
 	@Override
@@ -38,7 +42,6 @@ public class Robot extends TimedRobot
 		dt.displayEncoders();
 		dt.displayGyro();
 
-		intake.printPosition();
 		SmartDashboard.putNumber("ultrasonic", distanceSensor.getDistance());
 	}
 
@@ -46,12 +49,14 @@ public class Robot extends TimedRobot
 	public void teleopInit()
 	{
 		dt.resetSensors();
-		intake.resetEncoder();
+		dt.setMaxOutput(1);
 	}
+
+	SlewRateLimiter forwardLimiter = new SlewRateLimiter(1/(2^16));	//	2^16 = 65536
 
 	@Override
 	public void teleopPeriodic()
-	{	
+	{
 		//#region intake
 		if (driverController.getPOV(0) == 0)
 			intake.up();
@@ -61,44 +66,61 @@ public class Robot extends TimedRobot
 			intake.freezePosition();
 
 
-		if (driverController.getYButton())
+		if (driverController.getBumper(Hand.kRight))
 			intake.on();
+		else if (driverController.getBumper(Hand.kLeft))
+			intake.reverse();
 		else
 			intake.off();
 		//#endregion
 
 		//#region shooting
 		if (driverController.getXButton())
+		{
+            dt.aim();
 			shooter.shoot();
+		}
 		else
-			shooter.stopShooting();
+			shooter.stop();
 
 		if (driverController.getAButton())
-			shooter.shoot();
+			loader.load();
 		else if (driverController.getBButton())
-			shooter.reverseLoader();
+			loader.reverse();
 		else
-			shooter.stopLoading();
+			loader.stop();
 		//#endregion
 
 		//#region driving
-		double forwardPower = driverController.getY(kLeft);
+		double triggerValue = driverController.getTriggerAxis(Hand.kRight);
+		
+		final double minOutput = 0.2;
+		double output = (1 + minOutput) - triggerValue;	//	the more you press it, the lower the output is
+
+		dt.setMaxOutput(output);
+		
+
+
+		double forwardPower = -driverController.getY(kLeft);
 		double strafePower = driverController.getX(kLeft);
 		double turnPower = driverController.getX(kRight);
+
+		// forwardPower = forwardLimiter.calculate(forwardPower);
 
 		dt.drive(strafePower, forwardPower, turnPower);
 		//#endregion
 	}
 
-	// @Override
-	// public void testInit()
-	// {
-	// 	skills.init(skills::selectSimplePath);
-	// }
+	@Override
+	public void testInit()
+	{
+        dt.setMaxOutput(Constants.Drivetrain.autoMaxOutput);
+		skills.init(skills::selectSquare);
+	}
 
-	// @Override
-	// public void testPeriodic()
-	// {
-	// 	skills.periodic();
-	// }
+	@Override
+	public void testPeriodic()
+	{
+		skills.periodic();
+	}
 }

@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.sensors;
 
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import frc.robot.Constants;

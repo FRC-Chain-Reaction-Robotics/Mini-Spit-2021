@@ -15,15 +15,16 @@ import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.sensors.*;
 import frc.robot.Constants;
 
 public class Mecanum
 {
     /// Spitfire BIG
-    CANSparkMax lf = new CANSparkMax(Constants.LF, kBrushless);
-    CANSparkMax lb = new CANSparkMax(Constants.LB, kBrushless);
-    CANSparkMax rf = new CANSparkMax(Constants.RF, kBrushless);
-    CANSparkMax rb = new CANSparkMax(Constants.RB, kBrushless);
+    CANSparkMax lf = new CANSparkMax(Constants.Drivetrain.LF, kBrushless);
+    CANSparkMax lb = new CANSparkMax(Constants.Drivetrain.LB, kBrushless);
+    CANSparkMax rf = new CANSparkMax(Constants.Drivetrain.RF, kBrushless);
+    CANSparkMax rb = new CANSparkMax(Constants.Drivetrain.RB, kBrushless);
 
     /// Minispit
     // CANSparkMax lf = new CANSparkMax(2, kBrushless);
@@ -53,8 +54,9 @@ public class Mecanum
     {
         this.ll = ll;
         // md.setMaxOutput(0.44); // spitfire
+        
 
-        // md.setMaxOutput(.35); // minispit
+        // md.setMaxOutput(0.5); // minispit
 
 
         gyro.reset();
@@ -86,17 +88,22 @@ public class Mecanum
         // rb.setSmartCurrentLimit(40);
         
         // md.setMaxOutput(0.44);
-        md.setMaxOutput(1);
+        // md.setMaxOutput(1);
 
 		lf.burnFlash();
 		lb.burnFlash();
 		rf.burnFlash();
         rb.burnFlash();
         
-        distPID.setTolerance(0.01);
-        turnPID.setTolerance(0.2);//0.2
+        distPID.setTolerance(Constants.Drivetrain.distPIDTolerance);
+        turnPID.setTolerance(Constants.Drivetrain.turnPIDTolerance);
         
         // turnPID.setIntegratorRange(0, 15);
+
+        lf.setSmartCurrentLimit(40);
+        lb.setSmartCurrentLimit(40);
+        rb.setSmartCurrentLimit(40);
+        rf.setSmartCurrentLimit(40);
     }
     
     
@@ -179,7 +186,11 @@ public class Mecanum
     // PIDController turnPID = new PIDController(0.025, 0.5, 0.0075);
 
     // from frcpdr; Ziegler-Nichols PI only loop. slow but works
-    PIDController turnPID = new PIDController(0.09, 0.22, 0);
+    // PIDController turnPID = new PIDController(0.09, 0.22, 0);
+
+
+
+    PIDController turnPID = Constants.Drivetrain.turnPID;
 
     public boolean turnToAngle(double angle)
     {
@@ -188,13 +199,15 @@ public class Mecanum
         return turnPID.atSetpoint();
     }
 
-    PIDController distPID = new PIDController(2.5, 0, 0);
+
+
+    PIDController distPID = Constants.Drivetrain.distPID;
 
     public boolean driveToDistance(double distance)
     {
         double distanceOutput = distPID.calculate(m_leftFrontEncoder.getPosition(), distance);
-        // double turnOutput = turnPID.calculate(gyro.getAngle(), 0);
-        double turnOutput = 0;
+        double turnOutput = turnPID.calculate(gyro.getAngle(), 0);
+        // double turnOutput = 0;
         
         md.driveCartesian(0, distanceOutput, turnOutput);
 
@@ -206,5 +219,11 @@ public class Mecanum
         md.driveCartesian(0, 0, aimPID.calculate(ll.getTx(), 0));
 
         return turnPID.atSetpoint();
+    }
+
+
+    public void setMaxOutput(double maxOutput)
+    {
+        md.setMaxOutput(maxOutput);
     }
 }
