@@ -189,21 +189,21 @@ public class Skillz
         auton = new Object[][]
         {
             {drive, 1.704},
-            {turn, -63.0},
+            {turn, 63.0},
             {drive, 2.41},
-            {turn, 136.0},
+            {turn, -136.0},
             {drive, 1.078},
-            {turn, -32.0},
+            {turn, 32.0},
             {drive, 2.41},
-            {turn, -117.0},
+            {turn, 117.0},
             {drive, 2.41},
-            {turn, 152.0},
+            {turn, -152.0},
             {drive, 0.762},
-            {turn, -76.0},
+            {turn, 76.0},
             {drive, 2.41},
-            {turn, -76.0},
+            {turn, 76.0},
             {drive, 1.704},
-            {turn, 136.0}
+            {turn, -136.0}
         };
 	}
 	

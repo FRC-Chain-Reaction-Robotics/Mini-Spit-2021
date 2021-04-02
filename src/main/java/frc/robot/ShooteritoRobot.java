@@ -34,7 +34,9 @@ public class ShooteritoRobot extends Robot
             dt.aim();
         }
         else if (driverController.getBButton())
-            shooter.reverseLoader();
+			loader.reverse();
+		else if (driverController.getAButton())
+			loader.load();	//	just in case, to spit out balls that are jammed
         else
             shooter.stop();
 		//#endregion

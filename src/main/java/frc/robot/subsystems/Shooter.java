@@ -14,9 +14,8 @@ public class Shooter
     
     public Shooter()
     {
-        shootMotorRight.follow(shootMotorLeft);
-        shootMotorRight.setInverted(true);
-        shootMotorLeft.setInverted(false);
+        shootMotorRight.setInverted(false);
+        shootMotorLeft.setInverted(true);
         
         shootMotorLeft.setNeutralMode(NeutralMode.Coast);
         shootMotorRight.setNeutralMode(NeutralMode.Coast);
@@ -25,10 +24,14 @@ public class Shooter
     public void shoot()
     {
         shootMotorLeft.set(TalonFXControlMode.PercentOutput, SHOOTER_POWER);
+        shootMotorRight.set(TalonFXControlMode.PercentOutput, SHOOTER_POWER);
     }
 
     public void stop()
     {
         shootMotorLeft.set(TalonFXControlMode.PercentOutput, 0);
+        shootMotorRight.set(TalonFXControlMode.PercentOutput, 0);
     }
+
+
 }

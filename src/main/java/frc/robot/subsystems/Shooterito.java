@@ -3,21 +3,22 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.*;
 import com.ctre.phoenix.motorcontrol.can.*;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 
 public class Shooterito
 {
-    CRRFalcon500 master = new CRRFalcon500(Constants.SHOOTER_MOTOR_LEFT_ID, false, NeutralMode.Coast, new PIDGains(0.001, 0, 0));
+    CRRFalcon500 master = new CRRFalcon500(Constants.SHOOTER_MOTOR_LEFT_ID, false, NeutralMode.Coast);
     CRRFalcon500 slave = new CRRFalcon500(Constants.SHOOTER_MOTOR_RIGHT_ID, false, NeutralMode.Coast, master);
     BallMgmt loader;
 
     public Shooterito(BallMgmt loader) { this.loader = loader; }
 
     public void shoot()
-    {
-        master.setVelocity(6380);
-        
-        if (master.atSetpoint(50))
+    {    
+        master.set(1);
+
+        if (master.getVelocity() > 6300)
             loader.load();
         else
             loader.stop();
@@ -29,26 +30,11 @@ public class Shooterito
         loader.stop();
     }
 
-    public void reverseLoader()
+    public void printVelocities()
     {
-        loader.reverse();
+        SmartDashboard.putNumber("Velocity: ", master.getVelocity());
     }
 
-    /**
-     * Stores PID gain constants.
-     * <p> Usage: new PIDGains(kP, kI, kD) passed as an argument, with kP as your P constant and so on.
-     */
-    public class PIDGains
-    {
-        double kP, kI, kD;
-        
-        public PIDGains(double kP, double kI, double kD)
-        {
-            this.kP = kP;
-            this.kI = kI;
-            this.kD = kD;
-        }
-    }
     // pro tip when reading this class: minimize methods you don't want to read
     // shortcut is ctrl+k, then ctrl+0 to fold everything
     // ctrl k [ folds
@@ -56,6 +42,23 @@ public class Shooterito
 
     public class CRRFalcon500 extends WPI_TalonFX
     {
+        
+        /**
+         * Stores PID gain constants.
+         * <p> Usage: new PIDGains(kP, kI, kD) passed as an argument, with kP as your P constant and so on.
+         */
+        public class PIDGains
+        {
+            double kP, kI, kD;
+            
+            public PIDGains(double kP, double kI, double kD)
+            {
+                this.kP = kP;
+                this.kI = kI;
+                this.kD = kD;
+            }
+        }
+
         // YOU CAN NEVER HAVE ENOUGH CONSTRUCTOR OVERLOADS, MY FRIEND - Josh, 2021
 
         /**

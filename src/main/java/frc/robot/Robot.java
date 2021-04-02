@@ -49,7 +49,7 @@ public class Robot extends TimedRobot
 	public void teleopInit()
 	{
 		dt.resetSensors();
-		dt.setMaxOutput(1);
+		dt.setMaxOutput(Constants.Drivetrain.teleopMaxOutput);
 	}
 
 	SlewRateLimiter forwardLimiter = new SlewRateLimiter(1/(2^16));	//	2^16 = 65536
@@ -102,7 +102,7 @@ public class Robot extends TimedRobot
 
 
 		double forwardPower = -driverController.getY(kLeft);
-		double strafePower = driverController.getX(kLeft);
+		double strafePower = -driverController.getX(kLeft);
 		double turnPower = driverController.getX(kRight);
 
 		// forwardPower = forwardLimiter.calculate(forwardPower);
@@ -115,7 +115,7 @@ public class Robot extends TimedRobot
 	public void testInit()
 	{
         dt.setMaxOutput(Constants.Drivetrain.autoMaxOutput);
-		skills.init(skills::selectSquare);
+		skills.init(skills::selectSlalomPath);
 	}
 
 	@Override

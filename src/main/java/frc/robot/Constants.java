@@ -23,11 +23,11 @@ public class Constants
         public static final int RF = 2;
         public static final int RB = 8;
 
-        // for autonomous modes/skills challenges
-        public static final double autoMaxOutput = 0.5;
+        public static final double autoMaxOutput = 0.5; // for autonomous modes/skills challenges
+		public static final double teleopMaxOutput = 0.5;
 
         //  PID
-        public static final PIDController turnPID = new PIDController(0.01, 0, 0);
+        public static final PIDController turnPID = new PIDController(0.02, 0, 0);
         public static final double turnPIDTolerance = 0.2;
         
         public static final PIDController distPID = new PIDController(2.5, 0, 0);

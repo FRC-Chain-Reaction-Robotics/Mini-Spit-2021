@@ -94,10 +94,10 @@ public class Mecanum
         
         // turnPID.setIntegratorRange(0, 15);
 
-        lf.setSmartCurrentLimit(40);
-        lb.setSmartCurrentLimit(40);
-        rb.setSmartCurrentLimit(40);
-        rf.setSmartCurrentLimit(40);
+        lf.setSmartCurrentLimit(10);
+        lb.setSmartCurrentLimit(10);
+        rb.setSmartCurrentLimit(10);
+        rf.setSmartCurrentLimit(10);
     }    
     /**
    * Drive method for Mecanum platform.
@@ -143,7 +143,8 @@ public class Mecanum
         m_leftFrontEncoder.setPosition(0);
         m_rightFrontEncoder.setPosition(0);
     }
-
+    
+    //#region actions
     PIDController turnPID = Constants.Drivetrain.turnPID;
 
     public boolean turnToAngle(double angle)
@@ -153,7 +154,6 @@ public class Mecanum
         return turnPID.atSetpoint();
     }
 
-    //#region actions
     PIDController distPID = Constants.Drivetrain.distPID;
 
     public boolean driveToDistance(double distance)
