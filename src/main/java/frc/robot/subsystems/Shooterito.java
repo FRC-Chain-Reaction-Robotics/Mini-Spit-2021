@@ -12,13 +12,17 @@ public class Shooterito
     CRRFalcon500 slave = new CRRFalcon500(Constants.SHOOTER_MOTOR_RIGHT_ID, false, NeutralMode.Coast, master);
     BallMgmt loader;
 
-    public Shooterito(BallMgmt loader) { this.loader = loader; }
+    public Shooterito(BallMgmt loader)
+    {
+        this.loader = loader;
+        master.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 20, 0, 0));   // TODO: Check current limit?
+    }
 
     public void shoot()
     {    
         master.set(1);
 
-        if (master.getVelocity() > 6300)
+        if (master.getVelocity() > 6300)    //  TODO: velocity?
             loader.load();
         else
             loader.stop();
@@ -199,5 +203,4 @@ public class Shooterito
             return RPM;
         }
     }
-
 }
