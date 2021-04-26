@@ -43,7 +43,7 @@ public class Limelight {
         x = tx.getDouble(0.0);
         y = ty.getDouble(0.0);
         area = ta.getDouble(0.0);
-        v = tv.getBoolean(false);    
+        v = tv.getBoolean(false);
     }
 
     public void shuffleboardUpdate() {

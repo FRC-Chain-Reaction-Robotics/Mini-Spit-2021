@@ -11,20 +11,20 @@ public class ShooteritoRobot extends Robot
 	public void teleopPeriodic()
 	{
 		//#region intake
-		if (driverController.getPOV(0) == 0)
-			intake.up();
-		else if (driverController.getPOV(0) == 180)
-			intake.down();
-		else
-			intake.freezePosition();
+		// if (driverController.getPOV(0) == 0)
+		// 	intake.up();
+		// else if (driverController.getPOV(0) == 180)
+		// 	intake.down();
+		// else
+		// 	intake.freezePosition();
 
 
-		if (driverController.getBumper(Hand.kRight))
-			intake.on();
-		else if (driverController.getBumper(Hand.kLeft))
-			intake.reverse();
-		else
-			intake.off();
+		// if (driverController.getBumper(Hand.kRight))
+		// 	intake.on();
+		// else if (driverController.getBumper(Hand.kLeft))
+		// 	intake.reverse();
+		// else
+		// 	intake.off();
 		//#endregion
 
 		//#region shooting

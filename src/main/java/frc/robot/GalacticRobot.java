@@ -9,25 +9,27 @@ package frc.robot;
 
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.sensors.*;
 
 public class GalacticRobot extends Robot    //  now that is what one would refer to as Big Brain
 {
-    DistanceSensor d = new DistanceSensor();
+    // DistanceSensor d = new DistanceSensor();
 
 	@Override
 	public void testInit()
 	{
+		// var tab = Shuffleboard.getTab("Galaction");
+
         dt.setMaxOutput(Constants.Drivetrain.autoMaxOutput);
 
 		// okay but this whole thing wouldn't work if we always start in b1-d1
 		// 	OOOO how about a starting *angle* change, and we could use the gyro or distance sensor
 		//	or start further away from the edge of the field and change that distance
 
-		final double differentDistance = 100; // cm
+		final double differentDistance = 90; // cm
 		
-		double currentDistance = takeFiveSamples(d::getDistance);
+		double currentDistance = take20Samples(d::getDistance);
 
 
         // Modify accordingly.
@@ -37,23 +39,37 @@ public class GalacticRobot extends Robot    //  now that is what one would refer
         final Runnable redPath = isPathB ? skills::selectGalacticPathBRed : skills::selectGalacticPathARed;
         final Runnable bluePath = isPathB ? skills::selectGalacticPathBBlue : skills::selectGalacticPathABlue;
 
-		if (currentDistance < differentDistance)
+		final String galactedPath;
+
+		boolean isBlue = currentDistance > differentDistance;
+		
+		if (isBlue)
+		{
 			skills.init(bluePath);
+			galactedPath = "blue";
+		}
 		else
+		{
 			skills.init(redPath);
+			galactedPath = "red";
+		}
+
+		SmartDashboard.putBoolean("isBlue", isBlue);
+		SmartDashboard.putNumber("differentDistance", differentDistance);
+		SmartDashboard.putString("galacted path", galactedPath);
 	}
 
 
 	/**
 	 * just to get more accurate sensor readings when used in init() methods
 	 * @param getter method reference or lambda that returns a double
-	 * @return average of 5 samples of the sensor value
+	 * @return average of 20 samples of the sensor value
 	 */
-	public double takeFiveSamples(DoubleSupplier getter)
+	public double take20Samples(DoubleSupplier getter)
 	{
 		double averageOfFiveSamples = 0;
 		
-		for (int i = 0; i < 5; i++)
+		for (int i = 0; i < 20; i++)
 		{
 			double currentValue = getter.getAsDouble();
 			

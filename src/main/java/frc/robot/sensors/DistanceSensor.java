@@ -5,7 +5,12 @@ import frc.robot.Constants;
 
 public class DistanceSensor
 {
-    AnalogPotentiometer sensor = new AnalogPotentiometer(Constants.DISTANCE_SENSOR_ANALOG_IN_PORT, 512);
+    AnalogPotentiometer sensor;
+
+    public DistanceSensor()
+    {
+        sensor = new AnalogPotentiometer(Constants.DISTANCE_SENSOR_ANALOG_IN_PORT, 512);
+    }
 
     /**
      * Gets distance to wall from sensor

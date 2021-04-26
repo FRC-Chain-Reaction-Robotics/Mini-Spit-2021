@@ -5,6 +5,8 @@ import static com.revrobotics.CANSparkMaxLowLevel.MotorType.*;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.SparkMax;
+
 import static com.revrobotics.CANSparkMax.IdleMode.*;
 
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
@@ -40,7 +42,6 @@ public class Mecanum
     
     Gyro gyro = new ADXRS450_Gyro(kOnboardCS0);
 
-    PIDController aimPID = new PIDController(0.01, 0, 0);
 
     Limelight ll;
 
@@ -76,13 +77,15 @@ public class Mecanum
 		rb.setIdleMode(kCoast);
         lf.setIdleMode(kCoast);
         
-        // lb.setSmartCurrentLimit(40);
-        // lf.setSmartCurrentLimit(40);
-        // rf.setSmartCurrentLimit(40);
-        // rb.setSmartCurrentLimit(40);
-        
         // md.setMaxOutput(0.44);
         // md.setMaxOutput(1);
+
+        lf.setSmartCurrentLimit(40);
+        lb.setSmartCurrentLimit(40);
+        rb.setSmartCurrentLimit(40);
+        rf.setSmartCurrentLimit(40);
+
+        CANSparkMax.enableExternalUSBControl(false);
 
 		lf.burnFlash();
 		lb.burnFlash();
@@ -94,10 +97,6 @@ public class Mecanum
         
         // turnPID.setIntegratorRange(0, 15);
 
-        lf.setSmartCurrentLimit(10);
-        lb.setSmartCurrentLimit(10);
-        rb.setSmartCurrentLimit(10);
-        rf.setSmartCurrentLimit(10);
     }    
     /**
    * Drive method for Mecanum platform.
@@ -167,9 +166,12 @@ public class Mecanum
         return distPID.atSetpoint();
     }
 
+    
+    PIDController aimPID = Constants.Drivetrain.aimPID;
+
     public boolean aim()
     {
-        md.driveCartesian(0, 0, aimPID.calculate(ll.getTx(), 0));
+        md.driveCartesian(0, 0, aimPID.calculate(-ll.getTx(), 0));
 
         return turnPID.atSetpoint();
     }

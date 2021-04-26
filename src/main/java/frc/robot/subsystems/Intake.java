@@ -41,12 +41,12 @@ public class Intake
 
     public void up()
     {
-        intakeLifter.set(1);
+        intakeLifter.set(-1);
     }
 
     public void down()
     {
-        intakeLifter.set(-1);
+        intakeLifter.set(1);
     }
 
     public void freezePosition()
